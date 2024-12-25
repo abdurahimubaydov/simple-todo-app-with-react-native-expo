@@ -8,3 +8,6 @@ all of the item, that we mapped, need to be added in a new object. With this new
 
 
 ### Need to complete complite the task. I can do it with just its button or via alert as I wanna delete card
+
+
+### So I can complete it till tomorrow, 27.12.2024
