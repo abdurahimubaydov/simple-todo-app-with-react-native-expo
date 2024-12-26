@@ -1,5 +1,5 @@
-import { use, useEffect, useState } from 'react';
-import { StyleSheet, Text, SafeAreaView, View, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, SafeAreaView, View, ActivityIndicator, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Header from './components/header';
 import axios from 'axios';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -9,7 +9,7 @@ export default function App() {
   const [data, setData] = useState([])
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [addLoading, setAddLoading] = useState(false)
+  const [addLoading, setAddLoading] = useState(false);
 
   const getData = async () => {
     setIsLoading(true);
@@ -21,14 +21,14 @@ export default function App() {
     } catch (error) {
       console.error(error);
       setIsLoading(false);
-    }
+    };
   };
 
   const addData = async () => {
     if (!value) alert('Please fill the form')
     else {
       setAddLoading(true);
-      setTimeout(async ()  => {
+      setTimeout(async () => {
         const newData = { title: value, isComplited: false };
         try {
           const res = await axios.post('http://localhost:8000/todos', newData)
@@ -38,25 +38,52 @@ export default function App() {
           console.error(error);
           setAddLoading(false);
         };
-      }, 500-250)
+      }, 500 - 250)
     }
   };
 
-  const removeData = async (id) => {
+  const removeTask = async (id) => {
+    Alert.alert('Delete task', 'Are you sure you want to delete task?', [
+      { text: 'Cancel',style: 'default' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const res = await axios.delete(`http://localhost:8000/todos/${id}`);
+            getData();
+          } catch (error) {
+            console.error(error);
+          };
+        }
+      }
+    ])
+  };
+
+  const completeTask = async (item) => {
     try {
-      const res = await axios.delete(`http://localhost:8000/todos/${id}`);
-      getData();
+      const res = await axios.put(`http://localhost:8000/todos/${item.id}`, {isComplited: true, title: item.title});
     } catch (error) {
       console.error(error);
     };
+
+    setData(data.map(task => {
+      if (task.id === item.id) {
+        return {...task, isComplited: true}
+      }
+
+      return task
+    }))
   };
+
+  console.log(data.length);
+  
 
   useEffect(() => {
     getData()
   }, [])
 
 
-  console.log(data);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -80,6 +107,7 @@ export default function App() {
                 <Checkbox
                   disabled={item.isComplited}
                   value={item.isComplited}
+                  onValueChange={() => completeTask(item)}
                 />
               </TouchableOpacity>
               <Text style={{ textDecorationLine: item.isComplited === true ? 'line-through' : '' }}>{item.title}</Text>
@@ -87,7 +115,9 @@ export default function App() {
 
             <TouchableOpacity
               style={styles.iconCard}
-              onPress={() => removeData(item.id)}
+              onPress={() => {
+                removeTask(item.id)
+              }}
             >
               <AntDesign
                 name="delete"

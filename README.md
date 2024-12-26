@@ -11,3 +11,6 @@ all of the item, that we mapped, need to be added in a new object. With this new
 
 
 ### So I can complete it till tomorrow, 27.12.2024
+
+
+# project completed
